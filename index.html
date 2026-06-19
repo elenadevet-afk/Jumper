@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Platformer Builder PRO</title>
+    <title>Platformer Quiz PRO</title>
     <style>
         body { font-family: sans-serif; margin: 0; display: flex; height: 100vh; background: #121212; color: white; }
         #panel { width: 500px; background: #1a1a1a; padding: 20px; border-right: 2px solid #ffea00; overflow-y: auto; }
@@ -14,7 +14,7 @@
 <body>
 
 <div id="panel">
-    <h2>Редактор "Прыжок знаний" 🧗</h2>
+    <h2>Конструктор "Прыжок" 🧗</h2>
     <input type="color" id="p-col" value="#4caf50" onchange="draw()"> Цвет платформ<br>
     <input type="text" id="p-url" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png" oninput="draw()" placeholder="URL персонажа">
     <div id="q-list"></div>
@@ -26,7 +26,7 @@
 </div>
 
 <script>
-    let tasks = Array.from({length: 10}, (_, i) => ({q: "Вопрос "+(i+1), a: "ответ"}));
+    let tasks = Array.from({length: 10}, (_, i) => ({q: "Вопрос "+(i+1), right: "Верно", wrong: "Ошибка"}));
 
     function renderEditor() {
         const c = document.getElementById('q-list'); c.innerHTML = '<h3>Настройка 10 уровней:</h3>';
@@ -34,7 +34,8 @@
             const d = document.createElement('div'); d.className = 'card';
             d.innerHTML = `<small>Уровень ${i+1}</small><br>
                 Вопрос: <input type="text" value="${val.q}" oninput="tasks[${i}].q=this.value;draw()"><br>
-                Ответ: <input type="text" value="${val.a}" oninput="tasks[${i}].a=this.value;draw()">`;
+                Верный ответ: <input type="text" value="${val.right}" oninput="tasks[${i}].right=this.value;draw()"><br>
+                Неверный ответ: <input type="text" value="${val.wrong}" oninput="tasks[${i}].wrong=this.value;draw()">`;
             c.appendChild(d);
         });
     }
@@ -44,32 +45,42 @@
         const pCol = document.getElementById('p-col').value;
         const data = JSON.stringify(tasks);
         
-        return `<iframe srcdoc='<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#87ceeb;font-family:sans-serif">
+        return `<iframe srcdoc='<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:transparent;font-family:sans-serif">
             <div id="game" style="position:relative;width:400px;height:500px">
                 <div id="p" style="position:absolute;bottom:20px;left:45%;width:50px;height:50px;background:url(${pUrl}) no-repeat center/contain;transition:0.5s"></div>
             </div>
-            <div id="m" style="position:absolute;top:50px;left:50px;width:300px;background:white;padding:15px;text-align:center;border-radius:10px">
-                <h3 id="q"></h3>
-                <input type="text" id="ans" placeholder="Ваш ответ...">
-                <button onclick="check()">Ответить</button>
+            <div id="m" style="position:absolute;top:50px;left:25px;width:350px;background:rgba(255,255,255,0.7);padding:15px;text-align:center;border-radius:10px;border:1px solid #fff">
+                <h3 id="q" style="color:#000"></h3>
+                <div style="display:flex; justify-content:space-around;">
+                    <button id="btn1" onclick="check(true)" style="padding:10px; width:45%;"></button>
+                    <button id="btn2" onclick="check(false)" style="padding:10px; width:45%;"></button>
+                </div>
             </div>
             <script>
-                const tasks=${data}, p=document.getElementById("p"), q=document.getElementById("q"), inp=document.getElementById("ans");
+                const tasks=${data}, p=document.getElementById("p"), q=document.getElementById("q"), b1=document.getElementById("btn1"), b2=document.getElementById("btn2");
                 let lvl=0;
                 tasks.forEach((_,i)=>{
                     const div=document.createElement("div");
                     div.style="position:absolute;width:80px;height:15px;background:${pCol};left:"+(Math.random()*280)+"px;bottom:"+(60+i*45)+"px";
                     document.getElementById("game").appendChild(div);
                 });
-                function show(){ q.innerText=tasks[lvl].q; }
-                function check(){
-                    if(inp.value.toLowerCase() === tasks[lvl].a.toLowerCase()){
-                        lvl++; p.style.bottom=(lvl*45+20)+"px"; inp.value="";
+                function show(){ 
+                    q.innerText=tasks[lvl].q; 
+                    const coin = Math.random() > 0.5;
+                    b1.innerText = coin ? tasks[lvl].right : tasks[lvl].wrong;
+                    b2.innerText = coin ? tasks[lvl].wrong : tasks[lvl].right;
+                    b1.dataset.isRight = coin;
+                    b2.dataset.isRight = !coin;
+                }
+                function check(choice){
+                    const isRight = choice ? (b1.dataset.isRight === "true") : (b2.dataset.isRight === "true");
+                    if(isRight){
+                        lvl++; p.style.bottom=(lvl*45+20)+"px";
                         if(lvl>=tasks.length) alert("Победа!"); else show();
-                    } else { alert("Неверно! Падение!"); p.style.bottom="20px"; lvl=0; show(); }
+                    } else { alert("Неверно!"); p.style.bottom="20px"; lvl=0; show(); }
                 }
                 show();
-            <\/script></body></html>' width="400" height="500" frameborder="0"></iframe>`;
+            <\/script></body></html>' width="400" height="500" frameborder="0" allowtransparency="true"></iframe>`;
     }
 
     function draw() { document.getElementById('preview-frame').innerHTML = getCode(); }
