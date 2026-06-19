@@ -1,85 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <title>Platformer Quiz Builder</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
-        .box { background: white; padding: 20px; border-radius: 8px; border: 1px solid #ccc; }
-        textarea { width: 100%; height: 80px; }
-        input { width: 100%; margin-bottom: 10px; }
-        #output { width: 100%; height: 150px; background: #333; color: #0f0; padding: 10px; font-family: monospace; }
+        body { font-family: sans-serif; margin: 0; display: flex; height: 100vh; background: #121212; color: white; }
+        #panel { width: 450px; background: #1a1a1a; padding: 20px; border-right: 2px solid #ffea00; overflow-y: auto; }
+        .card { background: #252525; padding: 10px; margin-bottom: 10px; border-left: 4px solid #ffea00; }
+        input { width: 100%; padding: 8px; margin: 5px 0; background: #000; color: #fff; border: 1px solid #444; }
+        .btn-copy { background: #ffea00; color: black; padding: 15px; width: 100%; border: none; cursor: pointer; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>Настройки игры "Прыгун"</h2>
-        <label>URL персонажа (картинка):</label>
-        <input type="text" id="pImg" value="https://img.icons8.com/color/96/000000/genshin-impact.png">
-        
-        <label>Цвет платформ (например: #4CAF50):</label>
-        <input type="text" id="pColor" value="#4CAF50">
-        
-        <label>Задания (формат: Вопрос|Правильный ответ(true/false)):</label>
-        <textarea id="tasks">Геншин - это игра?|true
-В 7 классе учат физику?|true
-1+1=5?|false</textarea>
-        
-        <button onclick="generate()" style="padding: 10px 20px; background: blue; color: white; border: none; cursor: pointer;">СГЕНЕРИРОВАТЬ IFRAME</button>
-        
-        <h3>Скопируйте этот код для Genially:</h3>
-        <textarea id="output" readonly></textarea>
-    </div>
 
-    <script>
-        function generate() {
-            const pImg = document.getElementById('pImg').value;
-            const pColor = document.getElementById('pColor').value;
-            const tasks = document.getElementById('tasks').value.split('\n').map(line => {
-                const [q, a] = line.split('|');
-                return { q, a: a.trim() === 'true' };
-            });
+<div id="panel">
+    <h2>Конструктор "Попрыгунчик" 🧗</h2>
+    <label>Цвет платформ:</label>
+    <input type="color" id="p-col" value="#4caf50" onchange="draw()">
+    <label>URL картинки персонажа:</label>
+    <input type="text" id="p-url" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png" oninput="draw()">
+    <div id="q-list"></div>
+    <button class="btn-copy" onclick="copyCode()">СКОПИРОВАТЬ КОД ДЛЯ GENIALLY</button>
+</div>
 
-            const gameCode = `
-<!DOCTYPE html>
-<html><body style="margin:0; overflow:hidden; background:#87CEEB;">
-<div id="game" style="width:100vw; height:100vh; position:relative;">
-    <div id="player" style="width:50px; height:50px; position:absolute; bottom:20px; left:45%; background:url('${pImg}') no-repeat center/contain; transition:0.5s;"></div>
+<div id="view" style="flex-grow:1; display:flex; justify-content:center; align-items:center;">
+    <div id="preview-frame" style="background:#87ceeb; width:400px; height:500px;"></div>
 </div>
-<div id="modal" style="display:none; position:fixed; top:20%; left:20%; width:60%; padding:20px; background:white; text-align:center; border-radius:10px;">
-    <h2 id="qText"></h2>
-    <button onclick="ans(true)" style="padding:10px 20px;">Верно</button>
-    <button onclick="ans(false)" style="padding:10px 20px;">Ошибка</button>
-</div>
+
 <script>
-    let level = 0; const tasks = ${JSON.stringify(tasks)};
-    function createPlat(y) {
-        const div = document.createElement('div');
-        div.style = "position:absolute; width:100px; height:20px; background:${pColor};";
-        div.style.left = Math.random() * 80 + '%';
-        div.style.bottom = y + 'px';
-        document.getElementById('game').appendChild(div);
-    }
-    for(let i=0; i<10; i++) createPlat(100 + i*150);
-    function show() {
-        if(level >= tasks.length) return alert("Победа!");
-        document.getElementById('qText').innerText = tasks[level].q;
-        document.getElementById('modal').style.display = 'block';
-    }
-    function ans(v) {
-        if(v === tasks[level].a) {
-            level++;
-            document.getElementById('player').style.bottom = (level * 150 + 20) + 'px';
-            document.getElementById('modal').style.display = 'none';
-            if(level < tasks.length) setTimeout(show, 1000);
-        } else {
-            alert('Неверно! Падение!');
-            location.reload();
-        }
-    }
-    show();
-<\/script></body></html>`.replace(/"/g, "'");
+    let tasks = ["Вопрос 1", "Вопрос 2", "Вопрос 3", "Вопрос 4"];
 
-            document.getElementById('output').value = '<iframe srcdoc="' + gameCode + '" width="600" height="400" frameborder="0"></iframe>';
-        }
-    </script>
+    function renderEditor() {
+        const c = document.getElementById('q-list'); c.innerHTML = '<h3>Задания для уровней:</h3>';
+        tasks.forEach((val, i) => {
+            const d = document.createElement('div'); d.className = 'card';
+            d.innerHTML = `<small>Уровень ${i+1}</small><input type="text" value="${val}" oninput="tasks[${i}]=this.value;draw()">`;
+            c.appendChild(d);
+        });
+    }
+
+    function getCode() {
+        const pUrl = document.getElementById('p-url').value;
+        const pCol = document.getElementById('p-col').value;
+        const data = JSON.stringify(tasks);
+        
+        return `<iframe srcdoc='<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#87ceeb;font-family:sans-serif">
+            <div id="game" style="position:relative;width:400px;height:500px">
+                <div id="p" style="position:absolute;bottom:20px;left:50%;width:50px;height:50px;background:url(${pUrl}) no-repeat center/contain;transition:0.5s"></div>
+            </div>
+            <div id="m" style="display:none;position:absolute;top:100px;left:50px;width:300px;background:white;padding:20px;text-align:center;border-radius:10px">
+                <h3 id="q"></h3>
+                <button onclick="check(true)">Верно</button> <button onclick="check(false)">Ошибка</button>
+            </div>
+            <script>
+                const tasks=${data}, p=document.getElementById("p"), m=document.getElementById("m");
+                let lvl=0;
+                tasks.forEach((_,i)=>{
+                    const div=document.createElement("div");
+                    div.style="position:absolute;width:100px;height:20px;background:${pCol};left:"+(Math.random()*250)+"px;bottom:"+(100+i*100)+"px";
+                    document.getElementById("game").appendChild(div);
+                });
+                function show(){ document.getElementById("q").innerText=tasks[lvl]; m.style.display="block"; }
+                function check(res){
+                    if(res){ lvl++; p.style.bottom=(lvl*100+20)+"px"; m.style.display="none"; if(lvl>=tasks.length) alert("Победа!"); }
+                    else{ alert("Упал!"); location.reload(); }
+                }
+                show();
+            <\/script></body></html>' width="400" height="500" frameborder="0"></iframe>`;
+    }
+
+    function draw() { document.getElementById('preview-frame').innerHTML = getCode(); }
+    function copyCode() { navigator.clipboard.writeText(getCode()); alert("Код скопирован!"); }
+    renderEditor(); draw();
+</script>
 </body>
 </html>
