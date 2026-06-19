@@ -1,57 +1,9 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Platformer Editor PRO</title>
-    <style>
-        body { font-family: sans-serif; margin: 0; display: flex; height: 100vh; background: #121212; color: white; }
-        #panel { width: 500px; background: #1a1a1a; padding: 20px; border-right: 2px solid #ffea00; overflow-y: auto; }
-        .card { background: #252525; padding: 10px; margin-bottom: 10px; border-left: 4px solid #ffea00; }
-        input, select { width: 90%; padding: 8px; margin: 5px 0; }
-        .btn-copy { background: #ffea00; color: black; padding: 15px; width: 100%; border: none; cursor: pointer; font-weight: bold; margin-top: 20px; }
-    </style>
-</head>
-<body>
-
-<div id="panel">
-    <h2>Настройка игры 🎮</h2>
-    Цвет текста: <input type="color" id="txt-col" value="#ffffff" onchange="draw()"><br>
-    Размер шрифта: <input type="number" id="f-size" value="16" oninput="draw()"> px<br>
-    Цвет платформ: <input type="color" id="p-col" value="#4caf50" onchange="draw()"><br>
-    URL персонажа: <input type="text" id="p-url" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png" oninput="draw()"><br>
-    <div id="q-list"></div>
-    <button class="btn-copy" onclick="copyCode()">СКОПИРОВАТЬ КОД ДЛЯ GENIALLY</button>
-</div>
-
-<div id="view" style="flex-grow:1; display:flex; justify-content:center; align-items:center;">
-    <div id="preview-frame" style="background:#87ceeb; width:400px; height:500px;"></div>
-</div>
-
-<script>
-    let tasks = Array.from({length: 10}, (_, i) => ({q: "Q"+(i+1), right: "True", wrong: "False"}));
-    
-    function renderEditor() {
-        const c = document.getElementById('q-list'); c.innerHTML = '<h3>Вопросы:</h3>';
-        tasks.forEach((val, i) => {
-            const d = document.createElement('div'); d.className = 'card';
-            d.innerHTML = `Q${i+1}: <input type="text" value="${val.q}" oninput="tasks[${i}].q=this.value;draw()"><br>
-                Правильно: <input type="text" value="${val.right}" oninput="tasks[${i}].right=this.value;draw()"><br>
-                Ошибка: <input type="text" value="${val.wrong}" oninput="tasks[${i}].wrong=this.value;draw()">`;
-            c.appendChild(d);
-        });
-    }
-
-    function getCode() {
-        const pUrl = document.getElementById('p-url').value, pCol = document.getElementById('p-col').value;
-        const txtCol = document.getElementById('txt-col').value, fSize = document.getElementById('f-size').value;
-        const data = JSON.stringify(tasks);
-        
-        return `<iframe srcdoc='<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:transparent;font-family:sans-serif">
+<iframe srcdoc='<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:transparent;font-family:sans-serif">
             <div id="g" style="position:relative;width:400px;height:500px">
-                <div id="p" style="position:absolute;bottom:20px;left:175px;width:50px;height:50px;background:url(${pUrl}) no-repeat center/contain;transition:0.5s"></div>
+                <div id="p" style="position:absolute;bottom:20px;left:175px;width:50px;height:50px;background:url(https://cdn-icons-png.flaticon.com/128/1997/1997576.png) no-repeat center/contain;transition:0.5s"></div>
                 <div id="l" style="position:absolute;top:5px;left:10px;font-size:24px;z-index:100"></div>
             </div>
-            <div id="m" style="position:absolute;bottom:10px;left:25px;width:350px;background:rgba(0,0,0,0.6);padding:15px;text-align:center;border-radius:10px;color:${txtCol};font-size:${fSize}px;z-index:50">
+            <div id="m" style="position:absolute;bottom:10px;left:25px;width:350px;background:rgba(0,0,0,0.6);padding:15px;text-align:center;border-radius:10px;color:#c11f1f;font-size:16px;z-index:50">
                 <h3 id="q" style="margin:0 0 10px 0"></h3>
                 <div style="display:flex; justify-content:space-around; gap:10px;">
                     <button id="b1" onclick="check(true)" style="padding:10px;cursor:pointer;flex:1"></button>
@@ -59,7 +11,7 @@
                 </div>
             </div>
             <script>
-                const tasks=${data}, p=document.getElementById("p"), q=document.getElementById("q"), b1=document.getElementById("b1"), b2=document.getElementById("b2"), lDiv=document.getElementById("l");
+                const tasks=[{"q":"Q1","right":"True","wrong":"False"},{"q":"Q2","right":"True","wrong":"False"},{"q":"Q3","right":"True","wrong":"False"},{"q":"Q4","right":"True","wrong":"False"},{"q":"Q5","right":"True","wrong":"False"},{"q":"Q6","right":"True","wrong":"False"},{"q":"Q7","right":"True","wrong":"False"},{"q":"Q8","right":"True","wrong":"False"},{"q":"Q9","right":"True","wrong":"False"},{"q":"Q10","right":"True","wrong":"False"}], p=document.getElementById("p"), q=document.getElementById("q"), b1=document.getElementById("b1"), b2=document.getElementById("b2"), lDiv=document.getElementById("l");
                 let lvl=0, lives=3;
                 function updateHearts(){ lDiv.innerText="❤️".repeat(lives); }
                 updateHearts();
@@ -67,7 +19,7 @@
                     const d=document.createElement("div");
                     // Лесенка: меняем left через каждые 80px, чтобы не было столкновений
                     const x = (i % 2 === 0) ? 60 : 260;
-                    d.style="position:absolute;width:80px;height:12px;background:${pCol};left:"+x+"px;bottom:"+(60+i*40)+"px;border-radius:5px";
+                    d.style="position:absolute;width:80px;height:12px;background:#4caf50;left:"+x+"px;bottom:"+(60+i*40)+"px;border-radius:5px";
                     document.getElementById("g").appendChild(d);
                 });
                 function show(){ 
@@ -88,12 +40,4 @@
                     }
                 }
                 show();
-            <\/script></body></html>' width="400" height="500" frameborder="0" allowtransparency="true"></iframe>`;
-    }
-
-    function draw() { document.getElementById('preview-frame').innerHTML = getCode(); }
-    function copyCode() { navigator.clipboard.writeText(getCode()); alert("Код скопирован!"); }
-    renderEditor(); draw();
-</script>
-</body>
-</html>
+            </script></body></html>' width="400" height="500" frameborder="0" allowtransparency="true"></iframe>
