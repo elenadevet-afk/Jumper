@@ -2,20 +2,23 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Platformer Quiz PRO</title>
+    <title>Platformer Builder PRO</title>
     <style>
         body { font-family: sans-serif; margin: 0; display: flex; height: 100vh; background: #121212; color: white; }
         #panel { width: 500px; background: #1a1a1a; padding: 20px; border-right: 2px solid #ffea00; overflow-y: auto; }
         .card { background: #252525; padding: 10px; margin-bottom: 10px; border-left: 4px solid #ffea00; }
-        input { width: 90%; padding: 8px; margin: 5px 0; }
+        input, select { width: 90%; padding: 8px; margin: 5px 0; }
         .btn-copy { background: #ffea00; color: black; padding: 15px; width: 100%; border: none; cursor: pointer; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <div id="panel">
-    <h2>Конструктор "Прыжок" 🧗</h2>
-    <input type="color" id="p-col" value="#4caf50" onchange="draw()"> Цвет платформ<br>
+    <h2>Настройка игры 🎮</h2>
+    Язык интерфейса: <select id="lang" onchange="draw()"><option value="ru">Русский</option><option value="en">English</option></select><br>
+    Жизни: <input type="number" id="lives" value="3" oninput="draw()"><br>
+    Финальное сообщение: <input type="text" id="win-msg" value="Well done!" oninput="draw()"><br>
+    Цвет платформ: <input type="color" id="p-col" value="#4caf50" onchange="draw()"><br>
     <input type="text" id="p-url" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png" oninput="draw()" placeholder="URL персонажа">
     <div id="q-list"></div>
     <button class="btn-copy" onclick="copyCode()">СКОПИРОВАТЬ КОД ДЛЯ GENIALLY</button>
@@ -26,58 +29,53 @@
 </div>
 
 <script>
-    let tasks = Array.from({length: 10}, (_, i) => ({q: "Вопрос "+(i+1), right: "Верно", wrong: "Ошибка"}));
+    let tasks = Array.from({length: 10}, (_, i) => ({q: "Q"+(i+1), right: "Right", wrong: "Wrong"}));
 
     function renderEditor() {
-        const c = document.getElementById('q-list'); c.innerHTML = '<h3>Настройка 10 уровней:</h3>';
+        const c = document.getElementById('q-list'); c.innerHTML = '<h3>Вопросы:</h3>';
         tasks.forEach((val, i) => {
             const d = document.createElement('div'); d.className = 'card';
-            d.innerHTML = `<small>Уровень ${i+1}</small><br>
-                Вопрос: <input type="text" value="${val.q}" oninput="tasks[${i}].q=this.value;draw()"><br>
-                Верный ответ: <input type="text" value="${val.right}" oninput="tasks[${i}].right=this.value;draw()"><br>
-                Неверный ответ: <input type="text" value="${val.wrong}" oninput="tasks[${i}].wrong=this.value;draw()">`;
+            d.innerHTML = `Q${i+1}: <input type="text" value="${val.q}" oninput="tasks[${i}].q=this.value;draw()"><br>
+                Правильно: <input type="text" value="${val.right}" oninput="tasks[${i}].right=this.value;draw()"><br>
+                Неправильно: <input type="text" value="${val.wrong}" oninput="tasks[${i}].wrong=this.value;draw()">`;
             c.appendChild(d);
         });
     }
 
     function getCode() {
-        const pUrl = document.getElementById('p-url').value;
-        const pCol = document.getElementById('p-col').value;
-        const data = JSON.stringify(tasks);
+        const pUrl = document.getElementById('p-url').value, pCol = document.getElementById('p-col').value;
+        const lang = document.getElementById('lang').value, lives = document.getElementById('lives').value;
+        const winMsg = document.getElementById('win-msg').value, data = JSON.stringify(tasks);
         
         return `<iframe srcdoc='<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:transparent;font-family:sans-serif">
-            <div id="game" style="position:relative;width:400px;height:500px">
+            <div id="g" style="position:relative;width:400px;height:500px">
                 <div id="p" style="position:absolute;bottom:20px;left:45%;width:50px;height:50px;background:url(${pUrl}) no-repeat center/contain;transition:0.5s"></div>
+                <div id="l" style="position:absolute;top:10px;left:10px;font-weight:bold;color:red">${lang==="ru"?"Жизни: ":"Lives: "}${lives}</div>
             </div>
-            <div id="m" style="position:absolute;top:50px;left:25px;width:350px;background:rgba(255,255,255,0.7);padding:15px;text-align:center;border-radius:10px;border:1px solid #fff">
-                <h3 id="q" style="color:#000"></h3>
+            <div id="m" style="position:absolute;top:50px;left:25px;width:350px;background:rgba(255,255,255,0.7);padding:15px;text-align:center;border-radius:10px">
+                <h3 id="q"></h3>
                 <div style="display:flex; justify-content:space-around;">
-                    <button id="btn1" onclick="check(true)" style="padding:10px; width:45%;"></button>
-                    <button id="btn2" onclick="check(false)" style="padding:10px; width:45%;"></button>
+                    <button id="b1" onclick="check(true)" style="padding:10px"></button>
+                    <button id="b2" onclick="check(false)" style="padding:10px"></button>
                 </div>
             </div>
             <script>
-                const tasks=${data}, p=document.getElementById("p"), q=document.getElementById("q"), b1=document.getElementById("btn1"), b2=document.getElementById("btn2");
-                let lvl=0;
+                const tasks=${data}, p=document.getElementById("p"), q=document.getElementById("q"), b1=document.getElementById("b1"), b2=document.getElementById("b2"), lDiv=document.getElementById("l");
+                let lvl=0, lives=${lives};
                 tasks.forEach((_,i)=>{
-                    const div=document.createElement("div");
-                    div.style="position:absolute;width:80px;height:15px;background:${pCol};left:"+(Math.random()*280)+"px;bottom:"+(60+i*45)+"px";
-                    document.getElementById("game").appendChild(div);
+                    const d=document.createElement("div");
+                    d.style="position:absolute;width:80px;height:15px;background:${pCol};left:"+(Math.random()*280)+"px;bottom:"+(60+i*45)+"px";
+                    document.getElementById("g").appendChild(d);
                 });
                 function show(){ 
-                    q.innerText=tasks[lvl].q; 
-                    const coin = Math.random() > 0.5;
-                    b1.innerText = coin ? tasks[lvl].right : tasks[lvl].wrong;
-                    b2.innerText = coin ? tasks[lvl].wrong : tasks[lvl].right;
-                    b1.dataset.isRight = coin;
-                    b2.dataset.isRight = !coin;
+                    q.innerText=tasks[lvl].q; const c=Math.random()>0.5;
+                    b1.innerText=c?tasks[lvl].right:tasks[lvl].wrong; b2.innerText=c?tasks[lvl].wrong:tasks[lvl].right;
+                    b1.dataset.r=c; b2.dataset.r=!c;
                 }
-                function check(choice){
-                    const isRight = choice ? (b1.dataset.isRight === "true") : (b2.dataset.isRight === "true");
-                    if(isRight){
-                        lvl++; p.style.bottom=(lvl*45+20)+"px";
-                        if(lvl>=tasks.length) alert("Победа!"); else show();
-                    } else { alert("Неверно!"); p.style.bottom="20px"; lvl=0; show(); }
+                function check(c){
+                    const r = c?(b1.dataset.r==="true"):(b2.dataset.r==="true");
+                    if(r){ lvl++; p.style.bottom=(lvl*45+20)+"px"; if(lvl>=tasks.length) alert("${winMsg}"); else show(); }
+                    else{ lives--; lDiv.innerText="${lang==="ru"?"Жизни: ":"Lives: "}"+lives; if(lives<=0){ alert("${lang==="ru"?"Конец игры":"Game Over"}"); location.reload(); } else p.style.bottom="20px"; }
                 }
                 show();
             <\/script></body></html>' width="400" height="500" frameborder="0" allowtransparency="true"></iframe>`;
