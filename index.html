@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Platformer Builder PRO</title>
+    <title>Platformer Editor PRO</title>
     <style>
         body { font-family: sans-serif; margin: 0; display: flex; height: 100vh; background: #121212; color: white; }
         #panel { width: 500px; background: #1a1a1a; padding: 20px; border-right: 2px solid #ffea00; overflow-y: auto; }
@@ -15,9 +15,8 @@
 
 <div id="panel">
     <h2>Настройка игры 🎮</h2>
-    Язык: <select id="lang" onchange="draw()"><option value="ru">Русский</option><option value="en">English</option></select><br>
-    Жизни: <input type="number" id="lives" value="3" oninput="draw()"><br>
-    Финальное сообщение: <input type="text" id="win-msg" value="Well done!" oninput="draw()"><br>
+    Цвет текста: <input type="color" id="txt-col" value="#ffffff" onchange="draw()"><br>
+    Размер шрифта: <input type="number" id="f-size" value="16" oninput="draw()"> px<br>
     Цвет платформ: <input type="color" id="p-col" value="#4caf50" onchange="draw()"><br>
     URL персонажа: <input type="text" id="p-url" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png" oninput="draw()"><br>
     <div id="q-list"></div>
@@ -44,34 +43,31 @@
 
     function getCode() {
         const pUrl = document.getElementById('p-url').value, pCol = document.getElementById('p-col').value;
-        const lang = document.getElementById('lang').value, lives = document.getElementById('lives').value;
-        const winMsg = document.getElementById('win-msg').value, data = JSON.stringify(tasks);
+        const txtCol = document.getElementById('txt-col').value, fSize = document.getElementById('f-size').value;
+        const data = JSON.stringify(tasks);
         
         return `<iframe srcdoc='<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:transparent;font-family:sans-serif">
             <div id="g" style="position:relative;width:400px;height:500px">
                 <div id="p" style="position:absolute;bottom:20px;left:175px;width:50px;height:50px;background:url(${pUrl}) no-repeat center/contain;transition:0.5s"></div>
-                <div id="l" style="position:absolute;top:5px;left:10px;font-size:24px;z-index:100;pointer-events:none;"></div>
+                <div id="l" style="position:absolute;top:5px;left:10px;font-size:24px;z-index:100"></div>
             </div>
-            <div id="m" style="position:absolute;bottom:10px;left:25px;width:350px;background:rgba(0,0,0,0.7);padding:15px;text-align:center;border-radius:10px;color:white;z-index:50">
+            <div id="m" style="position:absolute;bottom:10px;left:25px;width:350px;background:rgba(0,0,0,0.6);padding:15px;text-align:center;border-radius:10px;color:${txtCol};font-size:${fSize}px;z-index:50">
                 <h3 id="q" style="margin:0 0 10px 0"></h3>
                 <div style="display:flex; justify-content:space-around; gap:10px;">
                     <button id="b1" onclick="check(true)" style="padding:10px;cursor:pointer;flex:1"></button>
                     <button id="b2" onclick="check(false)" style="padding:10px;cursor:pointer;flex:1"></button>
                 </div>
             </div>
-            <div id="end" style="display:none;position:absolute;top:0;left:0;width:400px;height:500px;background:rgba(0,0,0,0.95);color:gold;flex-direction:column;justify-content:center;align-items:center;z-index:200;">
-                <h1 style="text-align:center">${winMsg}</h1>
-                <button onclick="location.reload()" style="padding:10px 20px;cursor:pointer">Reset</button>
-            </div>
             <script>
                 const tasks=${data}, p=document.getElementById("p"), q=document.getElementById("q"), b1=document.getElementById("b1"), b2=document.getElementById("b2"), lDiv=document.getElementById("l");
-                let lvl=0, lives=${lives};
+                let lvl=0, lives=3;
                 function updateHearts(){ lDiv.innerText="❤️".repeat(lives); }
                 updateHearts();
                 tasks.forEach((_,i)=>{
                     const d=document.createElement("div");
-                    // Платформы теперь строго в диапазоне 60px - 450px по высоте
-                    d.style="position:absolute;width:80px;height:12px;background:${pCol};left:160px;bottom:"+(60+i*38)+"px;border-radius:5px";
+                    // Лесенка: меняем left через каждые 80px, чтобы не было столкновений
+                    const x = (i % 2 === 0) ? 60 : 260;
+                    d.style="position:absolute;width:80px;height:12px;background:${pCol};left:"+x+"px;bottom:"+(60+i*40)+"px;border-radius:5px";
                     document.getElementById("g").appendChild(d);
                 });
                 function show(){ 
@@ -82,12 +78,13 @@
                 function check(c){
                     const r = c?(b1.dataset.r==="true"):(b2.dataset.r==="true");
                     if(r){ 
-                        lvl++; p.style.bottom=(lvl*38+20)+"px"; 
-                        if(lvl>=tasks.length) document.getElementById("end").style.display="flex"; else show(); 
+                        lvl++; 
+                        const x = (lvl % 2 === 0) ? 175 : 275;
+                        p.style.bottom=(lvl*40+20)+"px"; p.style.left=x+"px";
+                        if(lvl>=tasks.length) alert("Victory!"); else show(); 
                     } else { 
                         lives--; updateHearts();
-                        if(lives<=0){ alert("${lang==="ru"?"Конец игры":"Game Over"}"); location.reload(); } 
-                        else { p.style.bottom="20px"; lvl=0; show(); }
+                        if(lives<=0){ location.reload(); } else { p.style.bottom="20px"; p.style.left="175px"; lvl=0; show(); }
                     }
                 }
                 show();
