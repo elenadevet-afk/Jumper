@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { margin: 0; overflow: hidden; background: #87CEEB; font-family: sans-serif; }
+        #canvas { display: block; }
+        #ui { position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.8); padding: 10px; border-radius: 8px; display: none; }
+    </style>
+</head>
+<body>
+<div id="ui">
+    <h3 id="question">Вопрос?</h3>
+    <button onclick="check(true)">Верно</button>
+    <button onclick="check(false)">Ошибка</button>
+</div>
+<canvas id="canvas"></canvas>
+
+<script>
+    // РЕДАКТОР: Меняйте вопросы и персонажа здесь
+    const characterImg = "https://img.icons8.com/color/96/000000/genshin-impact.png";
+    const questions = [
+        { text: "Is 'Genshin' a game?", answer: true },
+        { text: "Is 2+2=5?", answer: false }
+    ];
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let player = { x: 100, y: canvas.height - 100, vy: 0 };
+    let platforms = [{ x: 50, y: canvas.height - 50, w: 200 }];
+    
+    // Создаем платформы
+    for(let i=1; i<5; i++) {
+        platforms.push({ x: Math.random()*(canvas.width-100), y: canvas.height - 150*i, w: 100 });
+    }
+
+    function draw() {
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        platforms.forEach(p => { ctx.fillStyle = 'green'; ctx.fillRect(p.x, p.y, p.w, 20); });
+        
+        ctx.fillStyle = 'red';
+        ctx.fillRect(player.x, player.y, 40, 40); // Здесь можно рисовать Image
+        
+        player.y += 2; // Гравитация
+        if(player.y > canvas.height) player.y = canvas.height - 100; // Падение
+        
+        requestAnimationFrame(draw);
+    }
+    draw();
+
+    function check(userAns) {
+        // Логика перехода
+    }
+</script>
+</body>
+</html>
