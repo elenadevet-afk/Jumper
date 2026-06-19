@@ -14,12 +14,14 @@
 <body>
 
 <div id="panel">
-    <h2>Настройка дизайна 🎨</h2>
+    <h2>Финальная настройка 🛠️</h2>
+    Текст победы: <input type="text" id="win-text" value="Молодец!" oninput="draw()"><br>
     Размер персонажа: <input type="range" id="p-size" min="20" max="100" value="50" oninput="draw()"><br>
     Цвет текста: <input type="color" id="txt-col" value="#ffffff" onchange="draw()"><br>
     Цвет панели заданий: <input type="color" id="m-col" value="#000000" onchange="draw()"><br>
     Цвет кнопок: <input type="color" id="btn-col" value="#444444" onchange="draw()"><br>
-    Цвет финала: <input type="color" id="win-col" value="#ffd700" onchange="draw()"><br>
+    Цвет финала (текст): <input type="color" id="win-col" value="#ffd700" onchange="draw()"><br>
+    Цвет финала (рамка): <input type="color" id="win-border" value="#ffffff" onchange="draw()"><br>
     Цвет платформ: <input type="color" id="p-col" value="#4caf50" onchange="draw()"><br>
     URL персонажа: <input type="text" id="p-url" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png" oninput="draw()"><br>
     <div id="q-list"></div>
@@ -47,7 +49,8 @@
         const pUrl = document.getElementById('p-url').value, pCol = document.getElementById('p-col').value;
         const txtCol = document.getElementById('txt-col').value, btnCol = document.getElementById('btn-col').value;
         const winCol = document.getElementById('win-col').value, pSize = document.getElementById('p-size').value;
-        const mCol = document.getElementById('m-col').value;
+        const mCol = document.getElementById('m-col').value, winBorder = document.getElementById('win-border').value;
+        const winText = document.getElementById('win-text').value;
         const data = JSON.stringify(tasks);
         
         return `<iframe srcdoc='<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:transparent;font-family:sans-serif">
@@ -55,7 +58,7 @@
                 <div id="p" style="position:absolute;bottom:20px;left:10px;width:${pSize}px;height:${pSize}px;background:url(${pUrl}) no-repeat center/contain;transition:0.5s"></div>
                 <div id="l" style="position:absolute;top:5px;right:10px;font-size:24px"></div>
             </div>
-            <div id="msg-box" style="display:none; position:absolute; top:50px; left:50px; width:300px; padding:20px; border:2px solid ${winCol}; background:rgba(0,0,0,0.8); color:${winCol}; font-size:24px; font-weight:bold; text-align:center; border-radius:15px; z-index:100;">Well done!</div>
+            <div id="msg-box" style="display:none; position:absolute; top:50px; left:50px; width:300px; padding:20px; border:2px solid ${winBorder}; background:rgba(0,0,0,0.8); color:${winCol}; font-size:24px; font-weight:bold; text-align:center; border-radius:15px; z-index:100;">${winText}</div>
             <div id="m" style="position:absolute;bottom:0px;right:0px;width:200px;height:180px;background:${mCol};opacity:0.85;padding:10px;text-align:center;color:${txtCol};z-index:50">
                 <h3 id="q" style="margin:5px 0; font-size:14px;"></h3>
                 <button id="b1" onclick="check(true)" style="display:block;width:100%;margin-bottom:5px;cursor:pointer;background:${btnCol};color:${txtCol};border:none;padding:8px"></button>
