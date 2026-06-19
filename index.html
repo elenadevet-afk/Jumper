@@ -14,8 +14,10 @@
 <body>
 
 <div id="panel">
-    <h2>Настройка "Пологой лестницы" 🧗</h2>
+    <h2>Настройка дизайна 🎨</h2>
     Цвет текста: <input type="color" id="txt-col" value="#ffffff" onchange="draw()"><br>
+    Цвет кнопок: <input type="color" id="btn-col" value="#444444" onchange="draw()"><br>
+    Цвет финала: <input type="color" id="win-col" value="#ffd700" onchange="draw()"><br>
     Цвет платформ: <input type="color" id="p-col" value="#4caf50" onchange="draw()"><br>
     URL персонажа: <input type="text" id="p-url" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png" oninput="draw()"><br>
     <div id="q-list"></div>
@@ -41,7 +43,8 @@
 
     function getCode() {
         const pUrl = document.getElementById('p-url').value, pCol = document.getElementById('p-col').value;
-        const txtCol = document.getElementById('txt-col').value;
+        const txtCol = document.getElementById('txt-col').value, btnCol = document.getElementById('btn-col').value;
+        const winCol = document.getElementById('win-col').value;
         const data = JSON.stringify(tasks);
         
         return `<iframe srcdoc='<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:transparent;font-family:sans-serif">
@@ -49,21 +52,21 @@
                 <div id="p" style="position:absolute;bottom:20px;left:10px;width:50px;height:50px;background:url(${pUrl}) no-repeat center/contain;transition:0.5s"></div>
                 <div id="l" style="position:absolute;top:5px;right:10px;font-size:24px"></div>
             </div>
-            <div id="msg-box" style="display:none; position:absolute; top:80px; left:50px; width:300px; padding:20px; border:2px solid #fff; background:rgba(0,0,0,0.6); color:#fff; font-size:24px; font-weight:bold; text-align:center; border-radius:15px; z-index:100;">Well done!</div>
+            <div id="msg-box" style="display:none; position:absolute; top:50px; left:50px; width:300px; padding:20px; border:2px solid ${winCol}; background:rgba(0,0,0,0.6); color:${winCol}; font-size:24px; font-weight:bold; text-align:center; border-radius:15px; z-index:100;">Well done!</div>
             <div id="m" style="position:absolute;bottom:0px;right:0px;width:200px;height:180px;background:rgba(0,0,0,0.7);padding:10px;text-align:center;color:${txtCol};z-index:50">
                 <h3 id="q" style="margin:5px 0; font-size:14px;"></h3>
-                <button id="b1" onclick="check(true)" style="display:block;width:100%;margin-bottom:5px;cursor:pointer"></button>
-                <button id="b2" onclick="check(false)" style="display:block;width:100%;cursor:pointer"></button>
+                <button id="b1" onclick="check(true)" style="display:block;width:100%;margin-bottom:5px;cursor:pointer;background:${btnCol};color:${txtCol};border:none;padding:8px"></button>
+                <button id="b2" onclick="check(false)" style="display:block;width:100%;cursor:pointer;background:${btnCol};color:${txtCol};border:none;padding:8px"></button>
             </div>
             <script>
                 const tasks=${data}, p=document.getElementById("p"), q=document.getElementById("q"), b1=document.getElementById("b1"), b2=document.getElementById("b2"), lDiv=document.getElementById("l");
                 let lvl=0, lives=3;
-                const pos = [];
+                const platformCoords = [];
                 tasks.forEach((_,i)=>{
                     const d=document.createElement("div");
-                    // Угол стал еще более пологим: смещение X=60px, Y=35px
                     const x = 30 + (i * 60), y = 120 + (i * 35);
-                    pos.push({x: x + 5, y: y + 10});
+                    // Система координат: сохраняем центр платформы для персонажа
+                    platformCoords.push({x: x + 5, y: y + 10});
                     d.style="position:absolute;width:60px;height:10px;background:${pCol};left:"+x+"px;bottom:"+y+"px;border-radius:5px";
                     document.getElementById("g").appendChild(d);
                 });
@@ -77,8 +80,8 @@
                 function check(c){
                     const r = c?(b1.dataset.r==="true"):(b2.dataset.r==="true");
                     if(r){ 
+                        p.style.left=platformCoords[lvl].x+"px"; p.style.bottom=platformCoords[lvl].y+"px";
                         lvl++; 
-                        p.style.left=pos[lvl-1].x+"px"; p.style.bottom=pos[lvl-1].y+"px";
                         if(lvl>=tasks.length) { document.getElementById("msg-box").style.display="block"; } else show(); 
                     } else { 
                         lives--; updateHearts();
