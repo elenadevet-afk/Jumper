@@ -2,89 +2,30 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Конструктор игры</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game</title>
     <style>
-        body { font-family: sans-serif; margin: 0; display: flex; height: 100vh; background: #121212; color: white; }
-        #panel { width: 450px; padding: 20px; border-right: 2px solid #ffea00; overflow-y: auto; background: #1a1a1a; }
-        .card { background: #252525; padding: 10px; margin-bottom: 10px; border-left: 4px solid #ffea00; }
-        input { width: 90%; padding: 8px; margin: 5px 0; }
-        .btn-copy { background: #ffea00; color: black; padding: 15px; width: 100%; border: none; cursor: pointer; font-weight: bold; margin-top: 20px; }
+        body { margin: 0; padding: 0; background: #87ceeb; font-family: sans-serif; overflow: hidden; }
+        #game-container { width: 400px; height: 500px; position: relative; margin: 0 auto; background: #87ceeb; }
+        .step { position: absolute; width: 60px; height: 10px; background: #4caf50; border-radius: 5px; }
+        #char { position: absolute; width: 70px; height: 70px; transition: 0.3s; background: url('https://cdn-icons-png.flaticon.com/128/1997/1997576.png') no-repeat center/contain; }
+        #q-panel { position: absolute; bottom: 0; right: 0; width: 200px; background: #000; color: #fff; padding: 15px; text-align: center; }
+        button { display: block; width: 100%; margin: 5px 0; padding: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
-
-<div id="panel">
-    <h2>Settings 🛠️</h2>
-    <label>Character URL</label><input type="text" id="p-url" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png" oninput="draw()">
-    <label>Character Size</label><input type="range" id="p-size" min="20" max="150" value="70" oninput="draw()">
-    <label>Stairs Angle</label><input type="range" id="angle" min="5" max="80" value="30" oninput="draw()">
-    <label>Lives</label><input type="number" id="lives" value="3" oninput="draw()">
-    <label>Time (min)</label><input type="number" id="time" value="5" oninput="draw()">
-    <label>Timer Color</label><input type="color" id="col-timer" value="#ff0000" oninput="draw()">
-    <label>Platform Color</label><input type="color" id="col-steps" value="#4caf50" oninput="draw()">
-    <label>Panel Color</label><input type="color" id="col-panel" value="#000000" oninput="draw()">
-    <label>Button Color</label><input type="color" id="col-btn" value="#444444" oninput="draw()">
-    <label>Text Color</label><input type="color" id="col-text" value="#ffffff" oninput="draw()">
-    <div id="q-list"></div>
-    <button class="btn-copy" onclick="copyCode()">COPY CODE FOR GENIALLY</button>
-</div>
-
-<div id="view" style="flex-grow:1; display:flex; justify-content:center; align-items:center; background:#87ceeb;">
-    <div id="preview" style="width:400px; height:500px; border:2px solid #fff; position:relative; overflow:hidden;"></div>
-</div>
-
-<script>
-    let tasks = Array.from({length: 10}, (_, i) => ({q: "Question "+(i+1), right: "True", wrong: "False"}));
-    
-    function renderEditor() {
-        const c = document.getElementById('q-list'); c.innerHTML = '<h3>Questions:</h3>';
-        tasks.forEach((val, i) => {
-            const d = document.createElement('div'); d.className = 'card';
-            d.innerHTML = `Q${i+1}: <input type="text" value="${val.q}" oninput="tasks[${i}].q=this.value;draw()"><br>
-                Correct: <input type="text" value="${val.right}" oninput="tasks[${i}].right=this.value;draw()"><br>
-                Wrong: <input type="text" value="${val.wrong}" oninput="tasks[${i}].wrong=this.value;draw()">`;
-            c.appendChild(d);
-        });
-    }
-
-    function draw() {
-        const pUrl = document.getElementById('p-url').value;
-        const pSize = document.getElementById('p-size').value;
-        const angle = document.getElementById('angle').value;
-        const colSteps = document.getElementById('col-steps').value;
-        const colTimer = document.getElementById('col-timer').value;
-        const colPanel = document.getElementById('col-panel').value;
-        const colBtn = document.getElementById('col-btn').value;
-        const colText = document.getElementById('col-text').value;
-        const preview = document.getElementById('preview');
-        
-        let html = `<div style="color:${colTimer}; font-weight:bold; padding:10px;">🕒 05:00</div>`;
-        
-        tasks.forEach((_, i) => {
-            html += `<div style="position:absolute; width:60px; height:10px; background:${colSteps}; 
-            left:${30 + (i*angle)}px; bottom:${60 + (i*40)}px;"></div>`;
-        });
-        
-        html += `<div style="position:absolute; width:${pSize}px; height:${pSize}px; background:url('${pUrl}') no-repeat center/contain; left:${30 + 30 - pSize/2}px; bottom:70px;"></div>`;
-
-        html += `
-            <div style="position:absolute; bottom:0; right:0; width:200px; background:${colPanel}; color:${colText}; padding:10px; text-align:center; z-index:100;">
-                <h3 style="margin:5px 0; font-size:14px;">${tasks[0].q}</h3>
-                <button style="margin:2px; display:block; width:100%; background:${colBtn}; color:${colText};">${tasks[0].right}</button>
-                <button style="margin:2px; display:block; width:100%; background:${colBtn}; color:${colText};">${tasks[0].wrong}</button>
-            </div>`;
-        
-        preview.innerHTML = html;
-    }
-
-    function copyCode() {
-        const content = document.getElementById('preview').innerHTML;
-        const iframe = `<iframe srcdoc="<html><body style='margin:0; background:#87ceeb; overflow:hidden;'>${content}</body></html>" width="400" height="500" frameborder="0"></iframe>`;
-        navigator.clipboard.writeText(iframe);
-        alert("Готовый код для Genially скопирован!");
-    }
-
-    renderEditor(); draw();
-</script>
+    <div id="game-container">
+        <script>
+            for(let i=0; i<10; i++) {
+                document.write(`<div class="step" style="left:${30 + (i*30)}px; bottom:${60 + (i*40)}px;"></div>`);
+            }
+        </script>
+        <div id="char" style="left:25px; bottom:70px;"></div>
+        <div id="q-panel">
+            <h3 id="q-text" style="margin:0 0 10px 0; font-size:16px;">Question 1</h3>
+            <button onclick="alert('Верно!')">True</button>
+            <button onclick="alert('Ошибка!')">False</button>
+        </div>
+    </div>
 </body>
 </html>
