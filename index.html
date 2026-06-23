@@ -12,39 +12,80 @@
     </style>
 </head>
 <body>
+
 <div id="panel">
     <h2>Quest Settings 🛠️</h2>
-    <input type="text" id="p-url" placeholder="URL картинки" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png">
-    <input type="number" id="p-size" value="70" placeholder="Размер">
-    <input type="number" id="angle" value="30" placeholder="Угол">
+    <label>Character URL</label><input type="text" id="p-url" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png" oninput="draw()">
+    <label>Character Size</label><input type="range" id="p-size" min="20" max="150" value="70" oninput="draw()">
+    <label>Stairs Angle</label><input type="range" id="angle" min="5" max="80" value="30" oninput="draw()">
+    <label>Lives</label><input type="number" id="lives" value="3" oninput="draw()">
+    <label>Time (min)</label><input type="number" id="time" value="5" oninput="draw()">
+    <label>Timer Color</label><input type="color" id="col-timer" value="#ff0000" oninput="draw()">
+    <label>Platform Color</label><input type="color" id="col-steps" value="#4caf50" oninput="draw()">
+    <label>Panel Color</label><input type="color" id="col-panel" value="#000000" oninput="draw()">
+    <label>Button Color</label><input type="color" id="col-btn" value="#444444" oninput="draw()">
+    <label>Text Color</label><input type="color" id="col-text" value="#ffffff" oninput="draw()">
     <div id="q-list"></div>
-    <button class="btn-copy" onclick="generateAndCopy()">СКОПИРОВАТЬ КОД ДЛЯ GENIALLY</button>
+    <button class="btn-copy" onclick="copyCode()">COPY CODE</button>
 </div>
+
+<div id="view" style="flex-grow:1; display:flex; justify-content:center; align-items:center; background:#87ceeb;">
+    <div id="preview" style="width:400px; height:500px; border:2px solid #fff; position:relative; overflow:hidden;"></div>
+</div>
+
 <script>
     let tasks = Array.from({length: 10}, (_, i) => ({q: "Question "+(i+1), right: "True", wrong: "False"}));
-    const c = document.getElementById('q-list');
-    tasks.forEach((val, i) => {
-        c.innerHTML += `<div class="card">Q${i+1}: <input type="text" id="q${i}" value="${val.q}"><input type="text" id="r${i}" value="True"><input type="text" id="w${i}" value="False"></div>`;
-    });
-
-    function generateAndCopy() {
-        let qData = [];
-        for(let i=0; i<10; i++) qData.push({q: document.getElementById('q'+i).value, r: document.getElementById('r'+i).value, w: document.getElementById('w'+i).value});
-        
-        // ЭТОТ КОД ГЕНЕРИРУЕТСЯ ДЛЯ ВСТАВКИ
-        const gameCode = `
-        <div id="game" style="width:400px; height:500px; background:#87ceeb; position:relative; overflow:hidden;">
-            ${qData.map((d, i) => `<div style="position:absolute; width:60px; height:10px; background:green; left:${30+i*document.getElementById('angle').value}px; bottom:${60+i*40}px;"></div>`).join('')}
-            <div style="position:absolute; bottom:0; right:0; width:200px; background:black; color:white; padding:10px;">
-                <h3>${qData[0].q}</h3>
-                <button>${qData[0].r}</button><button>${qData[0].w}</button>
-            </div>
-        </div>`.replace(/"/g, "'");
-
-        const final = `<iframe srcdoc="<body style='margin:0'>${gameCode}</body>" width="400" height="500" frameborder="0"></iframe>`;
-        navigator.clipboard.writeText(final);
-        alert("Код готов! Вставьте его в Genially через Insert -> iFrame");
+    
+    function renderEditor() {
+        const c = document.getElementById('q-list'); c.innerHTML = '<h3>Questions:</h3>';
+        tasks.forEach((val, i) => {
+            const d = document.createElement('div'); d.className = 'card';
+            d.innerHTML = `Q${i+1}: <input type="text" value="${val.q}" oninput="tasks[${i}].q=this.value;draw()"><br>
+                Correct: <input type="text" value="${val.right}" oninput="tasks[${i}].right=this.value;draw()"><br>
+                Wrong: <input type="text" value="${val.wrong}" oninput="tasks[${i}].wrong=this.value;draw()">`;
+            c.appendChild(d);
+        });
     }
+
+    function draw() {
+        const pUrl = document.getElementById('p-url').value;
+        const pSize = document.getElementById('p-size').value;
+        const angle = document.getElementById('angle').value;
+        const colSteps = document.getElementById('col-steps').value;
+        const colTimer = document.getElementById('col-timer').value;
+        const colPanel = document.getElementById('col-panel').value;
+        const colBtn = document.getElementById('col-btn').value;
+        const colText = document.getElementById('col-text').value;
+        const preview = document.getElementById('preview');
+        
+        let html = `<div style="color:${colTimer}; font-weight:bold; padding:10px;">🕒 05:00</div>`;
+        
+        tasks.forEach((_, i) => {
+            html += `<div style="position:absolute; width:60px; height:10px; background:${colSteps}; 
+            left:${30 + (i*angle)}px; bottom:${60 + (i*40)}px;"></div>`;
+        });
+        
+        // Персонаж с использованием URL
+        html += `<div style="position:absolute; width:${pSize}px; height:${pSize}px; 
+        background:url('${pUrl}') no-repeat center/contain; 
+        left:${30 + 30 - pSize/2}px; bottom:70px;"></div>`;
+
+        html += `
+            <div style="position:absolute; bottom:0; right:0; width:200px; background:${colPanel}; color:${colText}; padding:10px; text-align:center; z-index:100;">
+                <h3 style="margin:5px 0; font-size:14px;">${tasks[0].q}</h3>
+                <button style="margin:2px; display:block; width:100%; background:${colBtn}; color:${colText};">${tasks[0].right}</button>
+                <button style="margin:2px; display:block; width:100%; background:${colBtn}; color:${colText};">${tasks[0].wrong}</button>
+            </div>`;
+        
+        preview.innerHTML = html;
+    }
+
+    function copyCode() {
+        navigator.clipboard.writeText(document.documentElement.outerHTML);
+        alert("Код скопирован!");
+    }
+
+    renderEditor(); draw();
 </script>
 </body>
 </html>
