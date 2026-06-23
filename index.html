@@ -1,31 +1,31 @@
+<iframe srcdoc="
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game</title>
+    <meta charset='UTF-8'>
     <style>
-        body { margin: 0; background: #87ceeb; font-family: sans-serif; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        #game { width: 400px; height: 500px; position: relative; background: #87ceeb; border: 2px solid white; }
+        body { margin: 0; background: #87ceeb; font-family: sans-serif; overflow: hidden; }
+        #game { width: 400px; height: 500px; position: relative; border: 2px solid white; }
         .step { position: absolute; width: 60px; height: 10px; background: #4caf50; border-radius: 5px; }
         .char { position: absolute; width: 70px; height: 70px; background: url('https://cdn-icons-png.flaticon.com/128/1997/1997576.png') center/contain; }
-        .panel { position: absolute; bottom: 0; right: 0; width: 200px; background: black; color: white; padding: 15px; text-align: center; }
-        button { width: 100%; margin-top: 5px; padding: 8px; cursor: pointer; }
+        .panel { position: absolute; bottom: 0; right: 0; width: 200px; background: black; color: white; padding: 10px; text-align: center; }
+        button { width: 100%; margin-top: 5px; padding: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div id="game">
+    <div id='game'>
         <script>
+            // Лестница
             for(let i=0; i<10; i++) {
-                document.write(`<div class="step" style="left:${30 + i*30}px; bottom:${60 + i*40}px;"></div>`);
+                document.write('<div class=\'step\' style=\'left:'+(30+i*30)+'px; bottom:'+(60+i*40)+'px;\'></div>');
             }
         </script>
-        <div class="char" style="left:25px; bottom:70px;"></div>
-        <div class="panel">
-            <h3 id="q-text" style="margin:0 0 10px 0;">Вопрос 1</h3>
-            <button onclick="alert('Верно!')">True</button>
-            <button onclick="alert('Ошибка!')">False</button>
+        <div class='char' style='left:25px; bottom:70px;'></div>
+        <div class='panel'>
+            <h3 id='q-text' style='margin:0 0 5px 0; font-size:14px;'>Вопрос 1</h3>
+            <button onclick='alert(\"Верно!\")'>True</button>
+            <button onclick='alert(\"Ошибка!\")'>False</button>
         </div>
     </div>
 </body>
-</html>
+</html>" width="400" height="500" frameborder="0"></iframe>
