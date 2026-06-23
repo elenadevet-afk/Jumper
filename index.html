@@ -1,31 +1,50 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game</title>
+    <title>Game Builder PRO</title>
     <style>
-        body { margin: 0; padding: 0; background: #87ceeb; font-family: sans-serif; overflow: hidden; }
-        #game-container { width: 400px; height: 500px; position: relative; margin: 0 auto; background: #87ceeb; }
-        .step { position: absolute; width: 60px; height: 10px; background: #4caf50; border-radius: 5px; }
-        #char { position: absolute; width: 70px; height: 70px; transition: 0.3s; background: url('https://cdn-icons-png.flaticon.com/128/1997/1997576.png') no-repeat center/contain; }
-        #q-panel { position: absolute; bottom: 0; right: 0; width: 200px; background: #000; color: #fff; padding: 15px; text-align: center; }
-        button { display: block; width: 100%; margin: 5px 0; padding: 10px; cursor: pointer; }
+        body { display: flex; font-family: sans-serif; height: 100vh; margin: 0; background: #222; color: #fff; }
+        #controls { width: 400px; padding: 20px; overflow-y: auto; background: #333; }
+        #preview { flex: 1; display: flex; justify-content: center; align-items: center; }
+        input { display: block; width: 90%; margin: 5px 0 15px; }
+        .q-row { border-bottom: 1px solid #555; padding: 5px 0; }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <script>
-            for(let i=0; i<10; i++) {
-                document.write(`<div class="step" style="left:${30 + (i*30)}px; bottom:${60 + (i*40)}px;"></div>`);
-            }
-        </script>
-        <div id="char" style="left:25px; bottom:70px;"></div>
-        <div id="q-panel">
-            <h3 id="q-text" style="margin:0 0 10px 0; font-size:16px;">Question 1</h3>
-            <button onclick="alert('Верно!')">True</button>
-            <button onclick="alert('Ошибка!')">False</button>
-        </div>
+    <div id="controls">
+        <h2>Редактор игры</h2>
+        <label>URL Персонажа</label><input type="text" id="p-url" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png" oninput="update()">
+        <label>Угол лестницы</label><input type="range" id="angle" min="10" max="60" value="30" oninput="update()">
+        <div id="questions"></div>
+        <button onclick="copyGameCode()" style="width:100%; padding:15px; background:gold; font-weight:bold; cursor:pointer;">СКОПИРОВАТЬ ИГРУ ДЛЯ GENIALLY</button>
     </div>
+    <div id="preview"></div>
+
+    <script>
+        let tasks = Array.from({length: 10}, (_, i) => ({q: "Q"+(i+1), right: "True", wrong: "False"}));
+        function update() {
+            let html = `<div style="width:400px; height:500px; background:#87ceeb; position:relative;">`;
+            tasks.forEach((_, i) => {
+                html += `<div style="position:absolute; width:60px; height:10px; background:green; left:${30+i*document.getElementById('angle').value}px; bottom:${60+i*40}px;"></div>`;
+            });
+            html += `<div style="position:absolute; width:70px; height:70px; background:url('${document.getElementById('p-url').value}') center/contain; left:50px; bottom:70px;"></div>`;
+            html += `<div style="position:absolute; bottom:0; right:0; width:150px; background:black; color:white; padding:10px; font-size:12px;">${tasks[0].q}<br><button>True</button><button>False</button></div></div>`;
+            document.getElementById('preview').innerHTML = html;
+        }
+        
+        function copyGameCode() {
+            const html = document.getElementById('preview').innerHTML.replace(/"/g, "'");
+            const final = `<iframe srcdoc="<body style='margin:0'>${html}</body>" width="400" height="500" frameborder="0"></iframe>`;
+            navigator.clipboard.writeText(final);
+            alert("Код для Genially скопирован!");
+        }
+
+        const qDiv = document.getElementById('questions');
+        tasks.forEach((t, i) => {
+            qDiv.innerHTML += `<div class="q-row">Q${i+1}: <input type="text" value="${t.q}" oninput="tasks[${i}].q=this.value;update()"></div>`;
+        });
+        update();
+    </script>
 </body>
 </html>
