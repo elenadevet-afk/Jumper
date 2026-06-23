@@ -1,50 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Game Builder PRO</title>
+    <title>Platformer Builder PRO</title>
     <style>
-        body { display: flex; font-family: sans-serif; height: 100vh; margin: 0; background: #222; color: #fff; }
-        #controls { width: 400px; padding: 20px; overflow-y: auto; background: #333; }
-        #preview { flex: 1; display: flex; justify-content: center; align-items: center; }
-        input { display: block; width: 90%; margin: 5px 0 15px; }
-        .q-row { border-bottom: 1px solid #555; padding: 5px 0; }
+        body { font-family: sans-serif; margin: 0; display: flex; height: 100vh; background: #121212; color: white; }
+        #panel { width: 450px; padding: 20px; border-right: 2px solid #ffea00; overflow-y: auto; background: #1a1a1a; }
+        .card { background: #252525; padding: 10px; margin-bottom: 10px; border-left: 4px solid #ffea00; }
+        input { width: 90%; padding: 8px; margin: 5px 0; }
+        .btn-copy { background: #ffea00; color: black; padding: 15px; width: 100%; border: none; cursor: pointer; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div id="controls">
-        <h2>Редактор игры</h2>
-        <label>URL Персонажа</label><input type="text" id="p-url" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png" oninput="update()">
-        <label>Угол лестницы</label><input type="range" id="angle" min="10" max="60" value="30" oninput="update()">
-        <div id="questions"></div>
-        <button onclick="copyGameCode()" style="width:100%; padding:15px; background:gold; font-weight:bold; cursor:pointer;">СКОПИРОВАТЬ ИГРУ ДЛЯ GENIALLY</button>
-    </div>
-    <div id="preview"></div>
+<div id="panel">
+    <h2>Quest Settings 🛠️</h2>
+    <input type="text" id="p-url" placeholder="URL картинки" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png">
+    <input type="number" id="p-size" value="70" placeholder="Размер">
+    <input type="number" id="angle" value="30" placeholder="Угол">
+    <div id="q-list"></div>
+    <button class="btn-copy" onclick="generateAndCopy()">СКОПИРОВАТЬ КОД ДЛЯ GENIALLY</button>
+</div>
+<script>
+    let tasks = Array.from({length: 10}, (_, i) => ({q: "Question "+(i+1), right: "True", wrong: "False"}));
+    const c = document.getElementById('q-list');
+    tasks.forEach((val, i) => {
+        c.innerHTML += `<div class="card">Q${i+1}: <input type="text" id="q${i}" value="${val.q}"><input type="text" id="r${i}" value="True"><input type="text" id="w${i}" value="False"></div>`;
+    });
 
-    <script>
-        let tasks = Array.from({length: 10}, (_, i) => ({q: "Q"+(i+1), right: "True", wrong: "False"}));
-        function update() {
-            let html = `<div style="width:400px; height:500px; background:#87ceeb; position:relative;">`;
-            tasks.forEach((_, i) => {
-                html += `<div style="position:absolute; width:60px; height:10px; background:green; left:${30+i*document.getElementById('angle').value}px; bottom:${60+i*40}px;"></div>`;
-            });
-            html += `<div style="position:absolute; width:70px; height:70px; background:url('${document.getElementById('p-url').value}') center/contain; left:50px; bottom:70px;"></div>`;
-            html += `<div style="position:absolute; bottom:0; right:0; width:150px; background:black; color:white; padding:10px; font-size:12px;">${tasks[0].q}<br><button>True</button><button>False</button></div></div>`;
-            document.getElementById('preview').innerHTML = html;
-        }
+    function generateAndCopy() {
+        let qData = [];
+        for(let i=0; i<10; i++) qData.push({q: document.getElementById('q'+i).value, r: document.getElementById('r'+i).value, w: document.getElementById('w'+i).value});
         
-        function copyGameCode() {
-            const html = document.getElementById('preview').innerHTML.replace(/"/g, "'");
-            const final = `<iframe srcdoc="<body style='margin:0'>${html}</body>" width="400" height="500" frameborder="0"></iframe>`;
-            navigator.clipboard.writeText(final);
-            alert("Код для Genially скопирован!");
-        }
+        // ЭТОТ КОД ГЕНЕРИРУЕТСЯ ДЛЯ ВСТАВКИ
+        const gameCode = `
+        <div id="game" style="width:400px; height:500px; background:#87ceeb; position:relative; overflow:hidden;">
+            ${qData.map((d, i) => `<div style="position:absolute; width:60px; height:10px; background:green; left:${30+i*document.getElementById('angle').value}px; bottom:${60+i*40}px;"></div>`).join('')}
+            <div style="position:absolute; bottom:0; right:0; width:200px; background:black; color:white; padding:10px;">
+                <h3>${qData[0].q}</h3>
+                <button>${qData[0].r}</button><button>${qData[0].w}</button>
+            </div>
+        </div>`.replace(/"/g, "'");
 
-        const qDiv = document.getElementById('questions');
-        tasks.forEach((t, i) => {
-            qDiv.innerHTML += `<div class="q-row">Q${i+1}: <input type="text" value="${t.q}" oninput="tasks[${i}].q=this.value;update()"></div>`;
-        });
-        update();
-    </script>
+        const final = `<iframe srcdoc="<body style='margin:0'>${gameCode}</body>" width="400" height="500" frameborder="0"></iframe>`;
+        navigator.clipboard.writeText(final);
+        alert("Код готов! Вставьте его в Genially через Insert -> iFrame");
+    }
+</script>
 </body>
 </html>
