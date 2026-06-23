@@ -2,51 +2,48 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Game Builder PRO</title>
+    <title>Genially Game Builder</title>
     <style>
-        body { display: flex; height: 100vh; margin: 0; background: #1e1e1e; color: #fff; font-family: sans-serif; }
-        #settings { width: 400px; padding: 20px; border-right: 2px solid #333; overflow-y: auto; }
-        #preview-box { flex: 1; display: flex; align-items: center; justify-content: center; background: #2d2d2d; }
-        input { width: 100%; margin-bottom: 10px; display: block; }
-        .btn { background: #007bff; color: white; border: none; padding: 10px; width: 100%; cursor: pointer; margin-top: 10px; }
+        body { font-family: sans-serif; background: #1a1a1a; color: white; padding: 20px; }
+        .box { background: #333; padding: 20px; border-radius: 8px; width: 400px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { background: #ffea00; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; }
+        #result { margin-top: 20px; word-break: break-all; background: #000; padding: 10px; color: #0f0; }
     </style>
 </head>
 <body>
-
-<div id="settings">
-    <h2>Настройки игры</h2>
-    <label>Вопрос:</label><input type="text" id="q" value="Вопрос 1">
-    <label>Верный ответ:</label><input type="text" id="r" value="Верно">
-    <label>Неверный ответ:</label><input type="text" id="w" value="Неверно">
-    <button class="btn" onclick="generate()">Обновить предпросмотр</button>
-    <button class="btn" style="background: #28a745;" onclick="copyIframe()">СКОПИРОВАТЬ IFRAME ДЛЯ GENIALLY</button>
-</div>
-
-<div id="preview-box">
-    <div id="target" style="width:400px; height:500px; background:#87ceeb; position:relative;"></div>
-</div>
+    <div class="box">
+        <h2>Настройка игры</h2>
+        <input type="text" id="q" placeholder="Ваш вопрос" value="Как называется эта игра?">
+        <input type="text" id="r" placeholder="Верный ответ" value="Платформер">
+        <input type="text" id="w" placeholder="Неверный ответ" value="Тест">
+        <button onclick="generate()">СГЕНЕРИРОВАТЬ КОД ДЛЯ GENIALLY</button>
+        <div id="result"></div>
+    </div>
 
 <script>
-    function generate() {
-        const q = document.getElementById('q').value;
-        const r = document.getElementById('r').value;
-        const w = document.getElementById('w').value;
-        const target = document.getElementById('target');
-        
-        target.innerHTML = `
-            <div style="position:absolute; bottom:0; right:0; width:200px; background:black; color:white; padding:15px; text-align:center;">
-                <h3>${q}</h3>
-                <button>${r}</button><button>${w}</button>
-            </div>`;
-    }
+function generate() {
+    const q = document.getElementById('q').value;
+    const r = document.getElementById('r').value;
+    const w = document.getElementById('w').value;
+    
+    // Генерируем "безопасный" HTML, закодированный в строку
+    const html = `<!DOCTYPE html><body style='margin:0; background:%2387ceeb; font-family:sans-serif;'>
+    <div style='width:400px; height:500px; position:relative; border:2px solid white;'>
+        <div style='position:absolute; bottom:0; right:0; width:200px; background:black; color:white; padding:15px; text-align:center;'>
+            <h3>${q}</h3>
+            <button onclick="alert('Правильно!')">${r}</button>
+            <button onclick="alert('Ошибка!')">${w}</button>
+        </div>
+    </div></body></html>`.replace(/"/g, "'");
 
-    function copyIframe() {
-        const html = document.getElementById('target').innerHTML;
-        const iframeCode = `<iframe srcdoc="<body style='margin:0'>${html.replace(/"/g, "'")}</body>" width="400" height="500" frameborder="0"></iframe>`;
-        navigator.clipboard.writeText(iframeCode);
-        alert("Код для Genially скопирован!");
-    }
-    generate();
+    const fullCode = `<iframe src="data:text/html;charset=utf-8,${html}" width="400" height="500" frameborder="0"></iframe>`;
+    
+    document.getElementById('result').innerText = fullCode;
+    // Авто-копирование
+    navigator.clipboard.writeText(fullCode);
+    alert("Код скопирован! Вставьте его в Genially (iFrame -> Вставить код)");
+}
 </script>
 </body>
 </html>
