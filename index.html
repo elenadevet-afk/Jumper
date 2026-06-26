@@ -1,4 +1,56 @@
-function getCode() {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Platformer Builder PRO</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; display: flex; height: 100vh; background: #121212; color: white; }
+        #panel { width: 500px; background: #1a1a1a; padding: 20px; border-right: 2px solid #ffea00; overflow-y: auto; }
+        .card { background: #252525; padding: 10px; margin-bottom: 10px; border-left: 4px solid #ffea00; }
+        input { width: 90%; padding: 8px; margin: 5px 0; }
+        .btn-copy { background: #ffea00; color: black; padding: 15px; width: 100%; border: none; cursor: pointer; font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div id="panel">
+    <h2>Quest Settings 🛠️</h2>
+    Lives: <input type="number" id="lives-count" value="3" min="1" max="10" oninput="draw()"><br>
+    Time (min): <input type="number" id="time-limit" value="5" min="0" oninput="draw()"><br>
+    Timer Color: <input type="color" id="timer-col" value="#ff0000" onchange="draw()"><br>
+    Victory Text: <input type="text" id="win-text" value="Well done!" oninput="draw()"><br>
+    Win Panel Bg: <input type="color" id="win-bg" value="#000000" onchange="draw()"><br>
+    Win Panel Border: <input type="color" id="win-border" value="#ffffff" onchange="draw()"><br>
+    Win Text Color: <input type="color" id="win-col" value="#ffd700" onchange="draw()"><br>
+    Character Size: <input type="range" id="p-size" min="20" max="300" value="100" oninput="draw()"><br>
+    Text Color: <input type="color" id="txt-col" value="#ffffff" onchange="draw()"><br>
+    Task Panel Color: <input type="color" id="m-col" value="#000000" onchange="draw()"><br>
+    Button Color: <input type="color" id="btn-col" value="#444444" onchange="draw()"><br>
+    Platform Color: <input type="color" id="p-col" value="#4caf50" onchange="draw()"><br>
+    Character URL: <input type="text" id="p-url" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png" oninput="draw()"><br>
+    <div id="q-list"></div>
+    <button class="btn-copy" onclick="copyCode()">COPY CODE FOR GENIALLY</button>
+</div>
+
+<div id="view" style="flex-grow:1; display:flex; justify-content:center; align-items:center;">
+    <div id="preview-frame" style="background:#87ceeb; width:400px; height:500px;"></div>
+</div>
+
+<script>
+    let tasks = Array.from({length: 10}, (_, i) => ({q: "Question "+(i+1), right: "True", wrong: "False"}));
+    
+    function renderEditor() {
+        const c = document.getElementById('q-list'); c.innerHTML = '<h3>Questions:</h3>';
+        tasks.forEach((val, i) => {
+            const d = document.createElement('div'); d.className = 'card';
+            d.innerHTML = `Q${i+1}: <input type="text" value="${val.q}" oninput="tasks[${i}].q=this.value;draw()"><br>
+                Correct: <input type="text" value="${val.right}" oninput="tasks[${i}].right=this.value;draw()"><br>
+                Wrong: <input type="text" value="${val.wrong}" oninput="tasks[${i}].wrong=this.value;draw()">`;
+            c.appendChild(d);
+        });
+    }
+
+    function getCode() {
         const pSize = document.getElementById('p-size').value, pUrl = document.getElementById('p-url').value;
         const pCol = document.getElementById('p-col').value, txtCol = document.getElementById('txt-col').value;
         const btnCol = document.getElementById('btn-col').value, winCol = document.getElementById('win-col').value;
@@ -22,10 +74,10 @@ function getCode() {
                 <button onclick="restart()" style="cursor:pointer; padding:10px 20px; background:${btnCol}; color:${txtCol}; border:none; border-radius:5px;">RESTART</button>
             </div>
             
-            <div id="m" style="position:absolute; top:50%; right:10px; transform:translateY(-50%); width:180px; background:${mCol}; opacity:0.9; padding:10px; text-align:center; color:${txtCol}; z-index:50; border-radius:10px;">
-                <h3 id="q" style="margin:5px 0; font-size:14px;"></h3>
-                <button id="b1" onclick="check(true)" style="display:block;width:100%;margin-bottom:5px;cursor:pointer;background:${btnCol};color:${txtCol};"></button>
-                <button id="b2" onclick="check(false)" style="display:block;width:100%;cursor:pointer;background:${btnCol};color:${txtCol};"></button>
+            <div id="m" style="position:absolute; top:50%; right:10px; transform:translateY(-50%); width:220px; background:${mCol}; opacity:0.9; padding:20px; text-align:center; color:${txtCol}; z-index:50; border-radius:15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                <h3 id="q" style="margin:0 0 15px 0; font-size:16px; line-height:1.4;"></h3>
+                <button id="b1" onclick="check(true)" style="display:block;width:100%;margin-bottom:10px;padding:10px;cursor:pointer;background:${btnCol};color:${txtCol};border:none;border-radius:5px;font-weight:bold;"></button>
+                <button id="b2" onclick="check(false)" style="display:block;width:100%;padding:10px;cursor:pointer;background:${btnCol};color:${txtCol};border:none;border-radius:5px;font-weight:bold;"></button>
             </div>
             <script>
                 const tasks=${data}, p=document.getElementById("p"), world=document.getElementById("world"), q=document.getElementById("q"), b1=document.getElementById("b1"), b2=document.getElementById("b2"), tVal=document.getElementById("time-val"), hDisp=document.getElementById("hearts-display");
@@ -91,3 +143,10 @@ function getCode() {
                 updateHearts(); updateView(0); show(); startTimer();
             <\/script></body></html>' width="400" height="500" frameborder="0" allowtransparency="true"></iframe>`;
     }
+
+    function draw() { document.getElementById('preview-frame').innerHTML = getCode(); }
+    function copyCode() { navigator.clipboard.writeText(getCode()); alert("Code copied!"); }
+    renderEditor(); draw();
+</script>
+</body>
+</html>
