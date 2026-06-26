@@ -1,56 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Platformer Builder PRO</title>
-    <style>
-        body { font-family: sans-serif; margin: 0; display: flex; height: 100vh; background: #121212; color: white; }
-        #panel { width: 500px; background: #1a1a1a; padding: 20px; border-right: 2px solid #ffea00; overflow-y: auto; }
-        .card { background: #252525; padding: 10px; margin-bottom: 10px; border-left: 4px solid #ffea00; }
-        input { width: 90%; padding: 8px; margin: 5px 0; }
-        .btn-copy { background: #ffea00; color: black; padding: 15px; width: 100%; border: none; cursor: pointer; font-weight: bold; margin-top: 20px; }
-    </style>
-</head>
-<body>
-
-<div id="panel">
-    <h2>Quest Settings 🛠️</h2>
-    Lives: <input type="number" id="lives-count" value="3" min="1" max="10" oninput="draw()"><br>
-    Time (min): <input type="number" id="time-limit" value="5" min="0" oninput="draw()"><br>
-    Timer Color: <input type="color" id="timer-col" value="#ff0000" onchange="draw()"><br>
-    Victory Text: <input type="text" id="win-text" value="Well done!" oninput="draw()"><br>
-    Win Panel Bg: <input type="color" id="win-bg" value="#000000" onchange="draw()"><br>
-    Win Panel Border: <input type="color" id="win-border" value="#ffffff" onchange="draw()"><br>
-    Win Text Color: <input type="color" id="win-col" value="#ffd700" onchange="draw()"><br>
-    Character Size: <input type="range" id="p-size" min="20" max="300" value="100" oninput="draw()"><br>
-    Text Color: <input type="color" id="txt-col" value="#ffffff" onchange="draw()"><br>
-    Task Panel Color: <input type="color" id="m-col" value="#000000" onchange="draw()"><br>
-    Button Color: <input type="color" id="btn-col" value="#444444" onchange="draw()"><br>
-    Platform Color: <input type="color" id="p-col" value="#4caf50" onchange="draw()"><br>
-    Character URL: <input type="text" id="p-url" value="https://cdn-icons-png.flaticon.com/128/1997/1997576.png" oninput="draw()"><br>
-    <div id="q-list"></div>
-    <button class="btn-copy" onclick="copyCode()">COPY CODE FOR GENIALLY</button>
-</div>
-
-<div id="view" style="flex-grow:1; display:flex; justify-content:center; align-items:center;">
-    <div id="preview-frame" style="background:#87ceeb; width:400px; height:500px;"></div>
-</div>
-
-<script>
-    let tasks = Array.from({length: 10}, (_, i) => ({q: "Question "+(i+1), right: "True", wrong: "False"}));
-    
-    function renderEditor() {
-        const c = document.getElementById('q-list'); c.innerHTML = '<h3>Questions:</h3>';
-        tasks.forEach((val, i) => {
-            const d = document.createElement('div'); d.className = 'card';
-            d.innerHTML = `Q${i+1}: <input type="text" value="${val.q}" oninput="tasks[${i}].q=this.value;draw()"><br>
-                Correct: <input type="text" value="${val.right}" oninput="tasks[${i}].right=this.value;draw()"><br>
-                Wrong: <input type="text" value="${val.wrong}" oninput="tasks[${i}].wrong=this.value;draw()">`;
-            c.appendChild(d);
-        });
-    }
-
-    function getCode() {
+function getCode() {
         const pSize = document.getElementById('p-size').value, pUrl = document.getElementById('p-url').value;
         const pCol = document.getElementById('p-col').value, txtCol = document.getElementById('txt-col').value;
         const btnCol = document.getElementById('btn-col').value, winCol = document.getElementById('win-col').value;
@@ -82,13 +30,28 @@
             <script>
                 const tasks=${data}, p=document.getElementById("p"), world=document.getElementById("world"), q=document.getElementById("q"), b1=document.getElementById("b1"), b2=document.getElementById("b2"), tVal=document.getElementById("time-val"), hDisp=document.getElementById("hearts-display");
                 const pSize=${pSize}, maxLives=${livesCount}, initialTime=${timeLimit};
-                let lvl=0, lives=maxLives, timeLeft=initialTime;
+                let lvl=0, lives=maxLives, timeLeft=initialTime, timer;
                 
                 function updateHearts() { hDisp.innerText = "❤️".repeat(lives); }
+                function startTimer() {
+                    clearInterval(timer);
+                    timer = setInterval(()=>{
+                        if(timeLeft > 0) {
+                            timeLeft--;
+                            let m=Math.floor(timeLeft/60), s=timeLeft%60;
+                            tVal.innerText=m+":"+(s<10?"0":"")+s;
+                        } else {
+                            clearInterval(timer);
+                            document.getElementById("msg-text").innerText="TIME IS UP!";
+                            document.getElementById("msg-box").style.display="block";
+                        }
+                    }, 1000);
+                }
+
                 function restart() {
                     lvl=0; lives=maxLives; timeLeft=initialTime;
                     world.style.bottom="0px"; document.getElementById("msg-box").style.display="none";
-                    updateHearts(); updateView(0); show();
+                    updateHearts(); updateView(0); show(); startTimer();
                 }
 
                 tasks.forEach((_,i)=>{
@@ -104,8 +67,7 @@
                     const y = 50 + (i * 80);
                     p.style.left = (x + 40 - pSize/2) + "px";
                     p.style.bottom = (y + 10) + "px";
-                    if (y > 200) world.style.bottom = -(y - 200) + "px";
-                    else world.style.bottom = "0px";
+                    world.style.bottom = (y > 200) ? -(y - 200) + "px" : "0px";
                 }
                 
                 function check(isRight){
@@ -113,10 +75,10 @@
                     if(r){
                         lvl++;
                         if(lvl < tasks.length) { updateView(lvl); show(); }
-                        else { document.getElementById("msg-text").innerText="${winText}"; document.getElementById("msg-box").style.display="block"; }
+                        else { clearInterval(timer); document.getElementById("msg-text").innerText="${winText}"; document.getElementById("msg-box").style.display="block"; }
                     } else {
                         lives--; updateHearts();
-                        if(lives <= 0) { document.getElementById("msg-text").innerText="GAME OVER"; document.getElementById("msg-box").style.display="block"; }
+                        if(lives <= 0) { clearInterval(timer); document.getElementById("msg-text").innerText="GAME OVER"; document.getElementById("msg-box").style.display="block"; }
                         else { world.style.bottom = "0px"; lvl=0; updateView(0); show(); }
                     }
                 }
@@ -125,14 +87,7 @@
                     b1.innerText=c?tasks[lvl].right:tasks[lvl].wrong; b2.innerText=c?tasks[lvl].wrong:tasks[lvl].right;
                     b1.dataset.r=c; b2.dataset.r=!c;
                 }
-                if(timeLeft>0) setInterval(()=>{ if(timeLeft>0){ timeLeft--; let m=Math.floor(timeLeft/60), s=timeLeft%60; tVal.innerText=m+":"+(s<10?"0":"")+s; } }, 1000);
-                updateHearts(); updateView(0); show();
+                
+                updateHearts(); updateView(0); show(); startTimer();
             <\/script></body></html>' width="400" height="500" frameborder="0" allowtransparency="true"></iframe>`;
     }
-
-    function draw() { document.getElementById('preview-frame').innerHTML = getCode(); }
-    function copyCode() { navigator.clipboard.writeText(getCode()); alert("Code copied!"); }
-    renderEditor(); draw();
-</script>
-</body>
-</html>
