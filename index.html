@@ -37,7 +37,8 @@
 </div>
 
 <script>
-    let tasks = Array.from({length: 10}, (_, i) => ({q: "Question "+(i+1), right: "True", wrong: "False"}));
+    // Увеличено количество задач до 12
+    let tasks = Array.from({length: 12}, (_, i) => ({q: "Question "+(i+1), right: "True", wrong: "False"}));
     
     function renderEditor() {
         const c = document.getElementById('q-list'); c.innerHTML = '<h3>Questions:</h3>';
