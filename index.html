@@ -37,7 +37,6 @@
 </div>
 
 <script>
-    // Увеличено количество задач до 12
     let tasks = Array.from({length: 12}, (_, i) => ({q: "Question "+(i+1), right: "True", wrong: "False"}));
     
     function renderEditor() {
@@ -66,7 +65,8 @@
             <div id="hearts-display" style="position:absolute;top:40px;left:10px;z-index:99;font-size:20px;"></div>
 
             <div id="world" style="position:relative;width:400px;height:500px;transition:0.5s">
-                <div id="p" style="position:absolute;width:${pSize}px;height:${pSize}px;background:url(${pUrl}) no-repeat center/contain;transition:0.5s;z-index:10"></div>
+                <!-- Картинка персонажа с принудительной подгрузкой -->
+                <img id="p" src="${pUrl}" crossorigin="anonymous" style="position:absolute;width:${pSize}px;height:${pSize}px;object-fit:contain;transition:0.5s;z-index:10">
                 <div id="platforms-container"></div>
             </div>
             
